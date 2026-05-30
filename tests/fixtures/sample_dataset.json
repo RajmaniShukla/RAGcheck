@@ -1,0 +1,32 @@
+[
+  {
+    "question": "What is Retrieval-Augmented Generation (RAG)?",
+    "contexts": [
+      "Retrieval-Augmented Generation (RAG) is a technique that combines information retrieval with language model generation. It was introduced by Facebook AI Research in 2020.",
+      "In a RAG system, when a user asks a question, relevant documents are first retrieved from a knowledge base, then passed as context to a language model to generate an accurate answer.",
+      "RAG helps reduce hallucination in LLMs by grounding responses in retrieved factual documents rather than relying solely on parametric knowledge."
+    ],
+    "answer": "RAG (Retrieval-Augmented Generation) is a technique that combines document retrieval with LLM generation. It retrieves relevant context first, then uses it to generate grounded, accurate answers.",
+    "ground_truth": "Retrieval-Augmented Generation (RAG) is an AI framework introduced by Facebook AI Research that enhances language model outputs by retrieving relevant documents from a knowledge base and using them as context during generation, thereby reducing hallucinations."
+  },
+  {
+    "question": "What are the main components of a RAG pipeline?",
+    "contexts": [
+      "A typical RAG pipeline consists of: (1) a document store or vector database, (2) an embedding model to encode queries and documents, (3) a retriever that finds relevant chunks, and (4) a generator (LLM) that produces the final answer.",
+      "Vector databases like Pinecone, Weaviate, and Chroma are commonly used in RAG systems to store and search document embeddings efficiently.",
+      "The quality of a RAG system depends heavily on chunk size, overlap, embedding model choice, and the number of retrieved chunks (top-k)."
+    ],
+    "answer": "The main components of a RAG pipeline are: a document store/vector database, an embedding model, a retriever, and a generator (LLM). The vector DB stores embeddings, the retriever fetches relevant chunks, and the LLM generates the final answer.",
+    "ground_truth": "A RAG pipeline has four main components: a document store (usually a vector database), an embedding model for encoding text, a retriever for finding relevant chunks, and a language model generator that synthesizes the final answer."
+  },
+  {
+    "question": "How does RAG reduce hallucination?",
+    "contexts": [
+      "RAG reduces hallucination by providing the LLM with explicit retrieved context at inference time, so the model can base its answer on real documents rather than making up facts.",
+      "Studies show that RAG-augmented models produce significantly fewer factual errors compared to standalone LLMs on knowledge-intensive tasks.",
+      "The eiffel tower was built in 1889 and stands 330 meters tall."
+    ],
+    "answer": "RAG reduces hallucination by giving the LLM verified source documents to ground its responses in. Instead of relying on memorized training data, the model synthesizes its answer from retrieved facts, which significantly reduces fabricated information.",
+    "ground_truth": "RAG reduces hallucination by providing the language model with retrieved factual documents at inference time, forcing the model to ground its answers in real source material rather than relying on potentially outdated or incorrect parametric knowledge."
+  }
+]

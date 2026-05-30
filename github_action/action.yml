@@ -1,0 +1,115 @@
+name: "RAGcheck Eval"
+description: "Evaluate your RAG pipeline quality in CI with ragcheck"
+author: "Rajmani Shukla"
+
+branding:
+  icon: "check-circle"
+  color: "purple"
+
+inputs:
+  input:
+    description: "Path to input file (.json or .csv) containing RAG test cases"
+    required: true
+  metrics:
+    description: 'Comma-separated metrics or "all". Default: context_relevance,faithfulness,answer_relevance'
+    required: false
+    default: "context_relevance,faithfulness,answer_relevance"
+  judge:
+    description: "Judge model (e.g. gpt-4o-mini, anthropic/claude-3-haiku-20240307)"
+    required: false
+    default: "gpt-4o-mini"
+  provider:
+    description: "Judge provider: litellm | openai | anthropic | local"
+    required: false
+    default: "litellm"
+  api_key:
+    description: "API key for the judge model"
+    required: false
+    default: ""
+  fail_threshold:
+    description: "Fail the workflow if overall score drops below this (0.0–1.0)"
+    required: false
+    default: "0.7"
+  output:
+    description: "Output file path for the report (.html or .json)"
+    required: false
+    default: "ragcheck-report.html"
+  concurrency:
+    description: "Max concurrent judge calls"
+    required: false
+    default: "4"
+  ragcheck_version:
+    description: "ragcheck version to install (default: latest)"
+    required: false
+    default: "latest"
+
+outputs:
+  overall_score:
+    description: "The overall evaluation score (0.0–1.0)"
+  report_path:
+    description: "Path to the generated report file"
+  passed:
+    description: "Whether the evaluation passed the threshold (true/false)"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install ragcheck
+      shell: bash
+      run: |
+        if [ "${{ inputs.ragcheck_version }}" = "latest" ]; then
+          pip install ragcheck --quiet
+        else
+          pip install "ragcheck==${{ inputs.ragcheck_version }}" --quiet
+        fi
+
+    - name: Run ragcheck eval
+      id: ragcheck_eval
+      shell: bash
+      env:
+        RAGCHECK_API_KEY: ${{ inputs.api_key }}
+        OPENAI_API_KEY: ${{ inputs.api_key }}
+        ANTHROPIC_API_KEY: ${{ inputs.api_key }}
+      run: |
+        THRESHOLD_ARG=""
+        if [ -n "${{ inputs.fail_threshold }}" ]; then
+          THRESHOLD_ARG="--fail-threshold ${{ inputs.fail_threshold }}"
+        fi
+
+        ragcheck eval \
+          --input "${{ inputs.input }}" \
+          --metrics "${{ inputs.metrics }}" \
+          --judge "${{ inputs.judge }}" \
+          --provider "${{ inputs.provider }}" \
+          --output "${{ inputs.output }}" \
+          --concurrency "${{ inputs.concurrency }}" \
+          $THRESHOLD_ARG \
+          --verbose 2>&1 | tee ragcheck_output.txt
+
+        EXIT_CODE=${PIPESTATUS[0]}
+
+        # Extract overall score from output
+        SCORE=$(grep "Overall score:" ragcheck_output.txt | grep -oP '[0-9]+\.[0-9]+' | head -1 || echo "0.0")
+        echo "overall_score=$SCORE" >> $GITHUB_OUTPUT
+        echo "report_path=${{ inputs.output }}" >> $GITHUB_OUTPUT
+
+        if [ $EXIT_CODE -eq 0 ]; then
+          echo "passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "passed=false" >> $GITHUB_OUTPUT
+        fi
+
+        exit $EXIT_CODE
+
+    - name: Upload report as artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ragcheck-report
+        path: ${{ inputs.output }}
+        if-no-files-found: warn

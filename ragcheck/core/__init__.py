@@ -1,0 +1,1 @@
+"""ragcheck.core — evaluation engine."""

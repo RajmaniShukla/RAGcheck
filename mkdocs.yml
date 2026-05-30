@@ -1,0 +1,65 @@
+site_name: RAGcheck Docs
+site_description: An open-source toolkit to measure, debug, and improve your RAG pipeline quality.
+site_url: https://ragcheck.readthedocs.io
+repo_url: https://github.com/RajmaniShukla/ragcheck
+repo_name: RajmaniShukla/ragcheck
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: guides/installation.md
+      - Quickstart: guides/quickstart.md
+      - CLI Reference: guides/cli.md
+  - Metrics:
+      - Overview: guides/metrics.md
+  - Integrations:
+      - LangChain: guides/langchain.md
+      - LlamaIndex: guides/llamaindex.md
+      - Custom Input: guides/custom.md
+  - Judges:
+      - Overview: guides/judges.md
+  - CI/CD:
+      - GitHub Action: guides/github-action.md
+  - API Reference:
+      - ragcheck: api/ragcheck.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - tables
