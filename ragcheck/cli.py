@@ -37,7 +37,7 @@ def eval_cmd(
     judge: str = typer.Option(
         "gpt-4o-mini",
         "--judge", "-j",
-        help="Judge model. Examples: gpt-4o-mini, anthropic/claude-3-haiku-20240307, ollama/llama3",
+        help="Judge model. Examples: gpt-4o-mini, claude-haiku-4-5, ollama/llama3",
     ),
     provider: str = typer.Option(
         "litellm",

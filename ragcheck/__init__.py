@@ -72,7 +72,7 @@ def evaluate(
         ground_truths:   Optional list of reference answers (needed for context_recall).
         metrics:         Metrics to evaluate. Defaults to [faithfulness, context_relevance, answer_relevance].
                          Use "all" as a single-element list for all 6 metrics.
-        judge_model:     Model string (e.g. "gpt-4o-mini", "anthropic/claude-3-haiku-20240307", "ollama/llama3").
+        judge_model:     Model string (e.g. "gpt-4o-mini", "claude-haiku-4-5", "ollama/llama3").
         judge_provider:  Provider type: "litellm" | "openai" | "anthropic" | "local".
         api_key:         API key (falls back to environment variable).
         api_base:        Custom API base URL for local deployments.

@@ -15,7 +15,7 @@ Given a question, retrieved context, and a generated answer — RAGcheck scores 
 ## ✨ Features
 
 - 📊 **6 production-ready metrics** — faithfulness, context relevance, answer relevance, context recall, noise sensitivity, chunk utilization
-- 🤖 **Model-agnostic judging** — GPT-4o, Claude 3, Gemini, or local Llama via Ollama/vLLM
+- 🤖 **Model-agnostic judging** — GPT-4o, Claude Haiku 4, Gemini, or local Llama via Ollama/vLLM
 - 🔌 **Framework-agnostic** — native connectors for LangChain & LlamaIndex, generic JSON/CSV input
 - 🚀 **CI-native** — GitHub Action with configurable pass/fail thresholds
 - 🎨 **Beautiful output** — Rich terminal tables, standalone HTML dashboard, JSON export
@@ -50,7 +50,7 @@ results = evaluate(
     answers=["RAG is a technique that combines retrieval with LLM generation for accurate answers."],
     ground_truths=["RAG (Retrieval-Augmented Generation) combines document retrieval with language model generation."],
     metrics=["faithfulness", "context_relevance", "answer_relevance", "context_recall"],
-    judge_model="gpt-4o-mini",
+    judge_model="gpt-4o-mini",   # or: "claude-haiku-4-5", "ollama/llama3"
 )
 
 print(results.summary())
@@ -72,7 +72,7 @@ print(results.summary())
 ragcheck eval --input tests/data.json --metrics all --judge gpt-4o --output report.html
 
 # Use Anthropic as judge
-ragcheck eval --input data.json --judge anthropic/claude-3-haiku-20240307 --output report.json
+ragcheck eval --input data.json --judge claude-haiku-4-5 --provider anthropic --output report.json
 
 # Use local Ollama (no API key needed!)
 ragcheck eval --input data.json --judge llama3 --provider local --api-base http://localhost:11434/v1
@@ -126,7 +126,8 @@ evaluate(..., judge_model="gpt-4o-mini")
 evaluate(..., judge_model="gpt-4o")
 
 # Anthropic
-evaluate(..., judge_model="anthropic/claude-3-haiku-20240307")
+evaluate(..., judge_model="claude-haiku-4-5", judge_provider="anthropic")
+evaluate(..., judge_model="claude-sonnet-4-5", judge_provider="anthropic")
 
 # Google
 evaluate(..., judge_model="gemini/gemini-pro")

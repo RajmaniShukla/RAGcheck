@@ -21,10 +21,23 @@ except ImportError:
     pass
 
 
+# Current Anthropic model names (as of 2026)
+# Haiku  (fast, cheap):  claude-haiku-4-5
+# Sonnet (balanced):     claude-sonnet-4-5
+# Opus   (powerful):     claude-opus-4-5
+# Note: old names like 'claude-3-haiku-20240307' are deprecated/removed.
+ANTHROPIC_DEFAULT_MODEL = "claude-haiku-4-5"
+
+
 class AnthropicJudge(BaseJudge):
     """
     Judge backend using the native Anthropic async client.
     Falls back to ANTHROPIC_API_KEY env var when config.api_key is None.
+
+    Recommended models:
+        claude-haiku-4-5    — fast, cheap, great for bulk evaluation
+        claude-sonnet-4-5   — balanced quality/cost
+        claude-opus-4-5     — highest quality
     """
 
     def __init__(self, config: JudgeConfig) -> None:

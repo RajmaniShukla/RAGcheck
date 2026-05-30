@@ -74,7 +74,7 @@ class JudgeConfig(BaseModel):
         "gpt-4o-mini",
         description=(
             "Model identifier. For LiteLLM, use provider/model format e.g. "
-            "'openai/gpt-4o', 'anthropic/claude-3-haiku-20240307', "
+            "'openai/gpt-4o', 'anthropic/claude-haiku-4-5', "
             "'ollama/llama3'."
         ),
     )

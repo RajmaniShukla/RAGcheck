@@ -48,7 +48,7 @@ def sample_with_hallucination() -> EvalSample:
 def eval_config_minimal() -> EvalConfig:
     return EvalConfig(
         metrics=[MetricName.FAITHFULNESS, MetricName.CONTEXT_RELEVANCE],
-        judge=JudgeConfig(model="gpt-4o-mini"),
+        judge=JudgeConfig(model="mock-model"),
         concurrency=2,
     )
 

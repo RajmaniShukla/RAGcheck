@@ -29,7 +29,7 @@ class LiteLLMJudge(BaseJudge):
 
     Supports all LiteLLM model strings:
     - "gpt-4o-mini"
-    - "anthropic/claude-3-haiku-20240307"
+    - "anthropic/claude-haiku-4-5"
     - "ollama/llama3"
     - "gemini/gemini-pro"
     """

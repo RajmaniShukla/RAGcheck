@@ -41,7 +41,7 @@ results = evaluate(
     answers=answers,
     ground_truths=ground_truths,
     metrics=["faithfulness", "context_relevance", "answer_relevance", "context_recall"],
-    judge_model="gpt-4o-mini",
+    judge_model="gpt-4o-mini",  # or: "claude-haiku-4-5" for Anthropic, "ollama/llama3" for local
 )
 
 # Print summary
