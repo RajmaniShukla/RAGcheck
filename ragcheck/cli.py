@@ -4,13 +4,11 @@ ragcheck CLI — entry point for `ragcheck eval` and related commands.
 from __future__ import annotations
 
 import asyncio
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, MofNCompleteColumn
+from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
 
 app = typer.Typer(
     name="ragcheck",
@@ -24,7 +22,7 @@ console = Console()
 
 @app.command("eval")
 def eval_cmd(
-    input: Path = typer.Option(
+    input_file: Path = typer.Option(
         ...,
         "--input", "-i",
         help="Input file path (.json or .csv). See docs for schema.",
@@ -46,24 +44,24 @@ def eval_cmd(
         "--provider", "-p",
         help="Judge provider: litellm | openai | anthropic | local",
     ),
-    api_key: Optional[str] = typer.Option(
+    api_key: str | None = typer.Option(
         None,
         "--api-key",
         help="API key (falls back to env vars: OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)",
         envvar="RAGCHECK_API_KEY",
     ),
-    api_base: Optional[str] = typer.Option(
+    api_base: str | None = typer.Option(
         None,
         "--api-base",
         help="Custom API base URL (for Ollama / vLLM local deployments).",
     ),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None,
         "--output", "-o",
         help="Output file path (.html or .json). Defaults to terminal output only.",
     ),
     concurrency: int = typer.Option(4, "--concurrency", "-c", help="Max concurrent judge calls."),
-    fail_threshold: Optional[float] = typer.Option(
+    fail_threshold: float | None = typer.Option(
         None,
         "--fail-threshold",
         help="Exit code 1 if overall score < threshold (for CI use).",
@@ -71,7 +69,7 @@ def eval_cmd(
         max=1.0,
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show per-sample breakdown."),
-    name: Optional[str] = typer.Option(None, "--name", "-n", help="Dataset / experiment name."),
+    name: str | None = typer.Option(None, "--name", "-n", help="Dataset / experiment name."),
 ) -> None:
     """
     [bold cyan]Evaluate a RAG pipeline from a JSON or CSV file.[/bold cyan]
@@ -79,15 +77,15 @@ def eval_cmd(
     [dim]Example:[/dim]
         ragcheck eval --input data.json --metrics all --judge gpt-4o --output report.html
     """
-    from ragcheck import evaluate_dataset, _resolve_metrics
+    from ragcheck import _resolve_metrics
     from ragcheck.connectors.custom import load as load_dataset
     from ragcheck.core.schema import EvalConfig, JudgeConfig, JudgeProvider
-    from ragcheck.reporters.terminal import print_report
-    from ragcheck.reporters.json_export import save_json
     from ragcheck.reporters.html_report import save_html
+    from ragcheck.reporters.json_export import save_json
+    from ragcheck.reporters.terminal import print_report
 
-    if not input.exists():
-        console.print(f"[red]Error:[/red] Input file not found: {input}")
+    if not input_file.exists():
+        console.print(f"[red]Error:[/red] Input file not found: {input_file}")
         raise typer.Exit(1)
 
     # Parse metrics
@@ -97,18 +95,18 @@ def eval_cmd(
         resolved_metrics = _resolve_metrics(metric_list)
     except ValueError as exc:
         console.print(f"[red]Invalid metric:[/red] {exc}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from exc
 
     # Load dataset
     try:
-        dataset = load_dataset(input, name=name)
+        dataset = load_dataset(input_file, name=name)
     except Exception as exc:
         console.print(f"[red]Failed to load input:[/red] {exc}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from exc
 
     console.print(
         f"\n[dim]Loaded [bold white]{len(dataset.samples)}[/bold white] samples from "
-        f"[bold white]{input.name}[/bold white][/dim]"
+        f"[bold white]{input_file.name}[/bold white][/dim]"
     )
     console.print(
         f"[dim]Metrics: [bold white]{', '.join(m.value for m in resolved_metrics)}[/bold white][/dim]"
@@ -130,7 +128,6 @@ def eval_cmd(
     )
 
     # Run with progress bar
-    completed_count = [0]
     total = len(dataset.samples)
 
     with Progress(
@@ -153,7 +150,7 @@ def eval_cmd(
             report = asyncio.run(pipeline.run(dataset))
         except Exception as exc:
             console.print(f"\n[red]Evaluation failed:[/red] {exc}")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from exc
 
     # Print report
     print_report(report, verbose=verbose)
@@ -192,8 +189,8 @@ def version_cmd() -> None:
 @app.command("metrics")
 def metrics_cmd() -> None:
     """List all available evaluation metrics."""
-    from rich.table import Table
     from rich import box
+    from rich.table import Table
 
     table = Table(box=box.ROUNDED, title="[bold]Available Metrics[/bold]", padding=(0, 1))
     table.add_column("Name", style="bold cyan")

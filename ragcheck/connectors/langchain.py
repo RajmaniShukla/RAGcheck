@@ -95,7 +95,7 @@ def from_retriever_and_answers(
         raise ValueError("questions, answers, and retrieved_docs_per_question must have equal length")
 
     samples = []
-    for i, (q, a, docs) in enumerate(zip(questions, answers, retrieved_docs_per_question)):
+    for i, (q, a, docs) in enumerate(zip(questions, answers, retrieved_docs_per_question, strict=False)):
         contexts = []
         for doc in docs:
             if hasattr(doc, "page_content"):

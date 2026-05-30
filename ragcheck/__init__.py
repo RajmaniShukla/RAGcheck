@@ -15,8 +15,9 @@ Quick start:
 from __future__ import annotations
 
 import asyncio
-from typing import Any
 
+from ragcheck.connectors.custom import from_csv, from_dicts, from_json
+from ragcheck.connectors.custom import load as load_dataset
 from ragcheck.core.pipeline import Pipeline
 from ragcheck.core.schema import (
     ALL_METRICS,
@@ -28,7 +29,6 @@ from ragcheck.core.schema import (
     JudgeProvider,
     MetricName,
 )
-from ragcheck.connectors.custom import from_dicts, from_json, from_csv, load as load_dataset
 
 __version__ = "0.1.0"
 __all__ = [
@@ -105,7 +105,7 @@ def evaluate(
             answer=a,
             ground_truth=(ground_truths[i] if ground_truths else None),
         )
-        for i, (q, c, a) in enumerate(zip(questions, contexts, answers))
+        for i, (q, c, a) in enumerate(zip(questions, contexts, answers, strict=False))
     ]
     dataset = EvalDataset(samples=samples)
 

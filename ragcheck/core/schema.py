@@ -6,8 +6,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
-
+from pydantic import BaseModel, Field
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -65,9 +64,6 @@ class EvalDataset(BaseModel):
     samples: list[EvalSample] = Field(..., min_length=1)
     name: str | None = Field(None, description="Optional dataset / experiment name.")
 
-    @model_validator(mode="after")
-    def check_ground_truth_for_recall(self) -> "EvalDataset":
-        return self
 
 
 class JudgeConfig(BaseModel):

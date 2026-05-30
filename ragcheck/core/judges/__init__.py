@@ -1,11 +1,11 @@
 """Judge factory and exports."""
 from __future__ import annotations
 
+from ragcheck.core.judges.anthropic_judge import AnthropicJudge
 from ragcheck.core.judges.base import BaseJudge, JudgeError
 from ragcheck.core.judges.litellm_judge import LiteLLMJudge
-from ragcheck.core.judges.openai_judge import OpenAIJudge
-from ragcheck.core.judges.anthropic_judge import AnthropicJudge
 from ragcheck.core.judges.local_judge import LocalJudge
+from ragcheck.core.judges.openai_judge import OpenAIJudge
 from ragcheck.core.schema import JudgeConfig, JudgeProvider
 
 

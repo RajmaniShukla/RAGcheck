@@ -7,7 +7,6 @@ Or via: ragcheck dashboard (future CLI command)
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import streamlit as st
 
@@ -32,17 +31,25 @@ st.markdown("""
 
 
 def score_color(score: float) -> str:
-    if score >= 0.8: return "green"
-    elif score >= 0.6: return "yellow"
-    elif score >= 0.4: return "orange"
-    else: return "red"
+    if score >= 0.8:
+        return "green"
+    elif score >= 0.6:
+        return "yellow"
+    elif score >= 0.4:
+        return "orange"
+    else:
+        return "red"
 
 
 def score_emoji(score: float) -> str:
-    if score >= 0.8: return "🟢"
-    elif score >= 0.6: return "🟡"
-    elif score >= 0.4: return "🟠"
-    else: return "🔴"
+    if score >= 0.8:
+        return "🟢"
+    elif score >= 0.6:
+        return "🟡"
+    elif score >= 0.4:
+        return "🟠"
+    else:
+        return "🔴"
 
 
 # ---- Sidebar ----

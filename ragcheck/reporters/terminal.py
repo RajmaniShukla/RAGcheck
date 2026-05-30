@@ -3,13 +3,13 @@ Terminal reporter — beautiful Rich CLI output.
 """
 from __future__ import annotations
 
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
-from rich import box
 
-from ragcheck.core.schema import EvalReport, MetricName
+from ragcheck.core.schema import EvalReport
 
 console = Console()
 
@@ -35,7 +35,7 @@ def print_report(report: EvalReport, verbose: bool = False) -> None:
     console.print()
 
     # Header
-    title = f"[bold cyan]RAGcheck Evaluation Report[/bold cyan]"
+    title = "[bold cyan]RAGcheck Evaluation Report[/bold cyan]"
     if report.dataset_name:
         title += f"  [dim]·[/dim]  [white]{report.dataset_name}[/white]"
     console.print(Panel(title, box=box.ROUNDED, padding=(0, 2)))

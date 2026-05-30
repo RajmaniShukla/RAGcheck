@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import math
 import statistics
-from typing import Callable
+from collections.abc import Callable
 
 from ragcheck.core.evaluators import build_evaluators
 from ragcheck.core.judges import build_judge

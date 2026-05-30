@@ -38,14 +38,30 @@ def from_dicts(
             # contexts can be a JSON string in CSV scenarios
             contexts = row["contexts"]
             if isinstance(contexts, str):
-                contexts = json.loads(contexts)
+                try:
+                    contexts = json.loads(contexts)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        f"Row {i}: 'contexts' is not valid JSON: {contexts!r}"
+                    ) from exc
+            if not isinstance(contexts, list):
+                raise ValueError(
+                    f"Row {i}: 'contexts' must be a list of strings, got {type(contexts).__name__}"
+                )
+            # metadata can also be JSON-encoded in CSV
+            metadata = row.get("metadata", {})
+            if isinstance(metadata, str) and metadata:
+                try:
+                    metadata = json.loads(metadata)
+                except json.JSONDecodeError:
+                    metadata = {}  # ignore malformed metadata silently
             samples.append(
                 EvalSample(
                     question=row["question"],
                     contexts=contexts,
                     answer=row["answer"],
-                    ground_truth=row.get("ground_truth"),
-                    metadata=row.get("metadata", {}),
+                    ground_truth=row.get("ground_truth") or None,
+                    metadata=metadata if isinstance(metadata, dict) else {},
                 )
             )
         except (KeyError, TypeError) as exc:

@@ -19,9 +19,11 @@ from ragcheck.core.schema import EvalSample, MetricName, MetricScore
 NOISE_GEN_PROMPT = """\
 Generate a single short paragraph (2–3 sentences) that is completely unrelated to the following question.
 The paragraph should look like plausible document text but contain NO information relevant to answering the question.
-Return only the paragraph text, nothing else.
 
 Question: {question}
+
+Return JSON with exactly these keys:
+{{"score": 0.5, "noise_text": "<your 2-3 sentence paragraph here>"}}
 """
 
 FAITHFULNESS_PROMPT = """\
@@ -53,12 +55,15 @@ class NoiseSensitivityEvaluator(BaseEvaluator):
 
             # Step 2: Generate a noise chunk
             noise_resp = await self.judge.judge(
-                # Wrap noise gen prompt to return {"score": 0.5, "text": "..."}
-                # We abuse the judge interface slightly here
-                f'{NOISE_GEN_PROMPT.format(question=sample.question)}\n\n'
-                'Return JSON: {"score": 0.5, "text": "<the paragraph>"}'
+                NOISE_GEN_PROMPT.format(question=sample.question)
             )
-            noise_chunk = noise_resp.get("text", "This is unrelated background information.")
+            # Accept either key name for robustness across LLMs
+            noise_chunk = (
+                noise_resp.get("noise_text")
+                or noise_resp.get("text")
+                or "This document discusses the history of ancient Roman architecture "
+                   "and its influence on modern building techniques in Europe."
+            )
 
             # Step 3: Noisy faithfulness
             noisy_contexts = sample.contexts + [noise_chunk]
@@ -70,9 +75,12 @@ class NoiseSensitivityEvaluator(BaseEvaluator):
             )
             noisy_score = noisy_result["score"]
 
-            # Step 4: Robustness = 1 - degradation
+            # Step 4: Robustness = 1 - degradation, clamped to [0, 1]
+            # noisy_score can occasionally be *higher* than baseline (noise chunk
+            # may coincidentally contain useful info), so degrade can be negative.
+            # We clamp to avoid Pydantic validation errors on the score field.
             degradation = abs(baseline_score - noisy_score)
-            robustness = round(1.0 - degradation, 4)
+            robustness = max(0.0, min(1.0, round(1.0 - degradation, 4)))
 
             return MetricScore(
                 metric=self.metric,

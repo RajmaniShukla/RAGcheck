@@ -84,3 +84,22 @@ class TestCustomConnector:
         p.write_text("<data/>")
         with pytest.raises(ValueError, match="Unsupported file format"):
             load(p)
+
+    def test_from_dicts_invalid_contexts_json_raises(self):
+        """Malformed JSON string in contexts field should raise ValueError cleanly."""
+        data = [{"question": "Q", "contexts": "{not valid json[", "answer": "A"}]
+        with pytest.raises(ValueError, match="not valid JSON"):
+            from_dicts(data)
+
+    def test_from_dicts_contexts_not_list_raises(self):
+        """contexts that parse to a non-list (e.g. a JSON object) should raise ValueError."""
+        # Valid JSON but not a list — should fail the list type check
+        data = [{"question": "Q", "contexts": '{"key": "value"}', "answer": "A"}]
+        with pytest.raises(ValueError, match="must be a list"):
+            from_dicts(data)
+
+    def test_from_dicts_empty_ground_truth_becomes_none(self):
+        """Empty string ground_truth should be coerced to None."""
+        data = [{"question": "Q", "contexts": ["C"], "answer": "A", "ground_truth": ""}]
+        dataset = from_dicts(data)
+        assert dataset.samples[0].ground_truth is None

@@ -8,7 +8,6 @@ Default vLLM base URL: http://localhost:8000/v1
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from typing import Any
 

@@ -34,7 +34,7 @@ def from_query_responses(
         raise ValueError("questions and responses must have the same length")
 
     samples = []
-    for i, (question, response) in enumerate(zip(questions, responses)):
+    for i, (question, response) in enumerate(zip(questions, responses, strict=False)):
         # Extract generated answer
         answer = str(response)
 
@@ -82,7 +82,7 @@ def from_retriever_results(
         raise ValueError("All input lists must have the same length")
 
     samples = []
-    for i, (q, a, nodes) in enumerate(zip(questions, answers, retrieved_nodes_per_question)):
+    for i, (q, a, nodes) in enumerate(zip(questions, answers, retrieved_nodes_per_question, strict=False)):
         contexts = []
         for node in nodes:
             text = None

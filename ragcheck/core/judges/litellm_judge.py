@@ -5,7 +5,9 @@ through a single unified interface.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
+import os
 from typing import Any
 
 from ragcheck.core.judges.base import BaseJudge, JudgeError
@@ -38,8 +40,11 @@ class LiteLLMJudge(BaseJudge):
             raise ImportError(
                 "litellm is required for LiteLLMJudge. Install it with: pip install litellm"
             )
-        # Disable litellm verbose logging unless debug mode
-        litellm.set_verbose = False
+        # Suppress litellm's noisy default logging unless caller sets DEBUG
+        if not os.environ.get("LITELLM_LOG"):
+            os.environ["LITELLM_LOG"] = "ERROR"
+        with contextlib.suppress(AttributeError):
+            litellm.set_verbose = False  # older versions
 
     async def judge(self, prompt: str) -> dict[str, Any]:
         kwargs: dict[str, Any] = {

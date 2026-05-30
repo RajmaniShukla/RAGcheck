@@ -8,7 +8,6 @@ from pathlib import Path
 
 from ragcheck.core.schema import EvalReport
 
-
 # ---------------------------------------------------------------------------
 # Inline template (Jinja2-style but rendered via str.format to avoid
 # requiring Jinja2 as a hard dep; uses {{ }} for template vars)

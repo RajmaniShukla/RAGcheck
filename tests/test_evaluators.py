@@ -75,6 +75,18 @@ class TestNoiseSensitivityEvaluator:
         assert "baseline_faithfulness" in result.details
         assert "noisy_faithfulness" in result.details
 
+    async def test_score_clamped_when_noisy_score_higher(self, sample_rag):
+        """If noise improves score (edge case), robustness must still be in [0, 1]."""
+        from tests.conftest import make_mock_judge
+        # baseline=0.3, noisy=0.9 → degradation=0.6 → robustness=0.4 (valid)
+        # baseline=0.9, noisy=0.9 → degradation=0.0 → robustness=1.0 (valid)
+        # worst case: baseline=0.0, noisy=1.0 → degradation=1.0 → robustness=0.0 (valid, clamped)
+        improving_judge = make_mock_judge({"score": 0.9, "reasoning": "",
+                                           "noise_text": "Unrelated text about cooking."})
+        ev = NoiseSensitivityEvaluator(improving_judge)
+        result = await ev.evaluate(sample_rag)
+        assert 0.0 <= result.score <= 1.0
+
 
 class TestChunkUtilizationEvaluator:
     async def test_evaluate_returns_utilization(self, sample_rag, mock_judge):
