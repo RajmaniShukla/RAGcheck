@@ -27,9 +27,9 @@ inputs:
     required: false
     default: ""
   fail_threshold:
-    description: "Fail the workflow if overall score drops below this (0.0–1.0)"
+    description: "Fail the workflow if overall score drops below this (0.0–1.0). Leave empty to never fail on score."
     required: false
-    default: "0.7"
+    default: ""
   output:
     description: "Output file path for the report (.html or .json)"
     required: false
@@ -77,8 +77,9 @@ runs:
         ANTHROPIC_API_KEY: ${{ inputs.api_key }}
       run: |
         THRESHOLD_ARG=""
-        if [ -n "${{ inputs.fail_threshold }}" ]; then
-          THRESHOLD_ARG="--fail-threshold ${{ inputs.fail_threshold }}"
+        THRESHOLD_VAL="${{ inputs.fail_threshold }}"
+        if [ -n "$THRESHOLD_VAL" ] && [ "$THRESHOLD_VAL" != "0" ]; then
+          THRESHOLD_ARG="--fail-threshold $THRESHOLD_VAL"
         fi
 
         ragcheck eval \

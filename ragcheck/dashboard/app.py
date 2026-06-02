@@ -55,7 +55,7 @@ def score_emoji(score: float) -> str:
 # ---- Sidebar ----
 with st.sidebar:
     st.image("https://raw.githubusercontent.com/RajmaniShukla/ragcheck/main/docs/logo.png",
-             width=120, use_column_width=False)
+             width=120)
     st.title("🔍 RAGcheck")
     st.caption("RAG Pipeline Quality Evaluator")
     st.divider()

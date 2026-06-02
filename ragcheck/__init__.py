@@ -15,6 +15,7 @@ Quick start:
 from __future__ import annotations
 
 import asyncio
+import sys
 
 from ragcheck.connectors.custom import from_csv, from_dicts, from_json
 from ragcheck.connectors.custom import load as load_dataset
@@ -121,7 +122,7 @@ def evaluate(
         fail_threshold=fail_threshold,
     )
 
-    return asyncio.run(evaluate_dataset(dataset, config))
+    return _run_async(evaluate_dataset(dataset, config))
 
 
 async def evaluate_dataset(dataset: EvalDataset, config: EvalConfig) -> EvalReport:
@@ -131,6 +132,46 @@ async def evaluate_dataset(dataset: EvalDataset, config: EvalConfig) -> EvalRepo
     """
     pipeline = Pipeline(config)
     return await pipeline.run(dataset)
+
+
+def _run_async(coro) -> EvalReport:  # type: ignore[type-arg]
+    """
+    Run a coroutine, handling the case where an event loop is already running
+    (e.g. Jupyter notebooks, IPython, FastAPI request handlers, pytest-asyncio).
+
+    Strategy:
+    1. If no loop is running: use asyncio.run() (standard path).
+    2. If a loop IS running (Jupyter / async frameworks): try to use
+       nest_asyncio if available, otherwise raise a clear error with
+       guidance to use `await evaluate_dataset(...)` directly.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop is None:
+        # Clean path: no running loop, just run it.
+        return asyncio.run(coro)
+
+    # A loop is already running (Jupyter / async server / pytest-asyncio)
+    try:
+        import nest_asyncio  # type: ignore[import]
+        nest_asyncio.apply()
+        return loop.run_until_complete(coro)
+    except ImportError:
+        pass
+
+    raise RuntimeError(
+        "evaluate() cannot be called from within an already-running async event loop "
+        "(e.g. Jupyter, IPython, FastAPI, or pytest-asyncio).\n\n"
+        "Options:\n"
+        "  1. Use the async version directly:\n"
+        "       results = await ragcheck.evaluate_dataset(dataset, config)\n"
+        "  2. Install nest_asyncio for transparent Jupyter support:\n"
+        "       pip install nest_asyncio\n"
+        "     Then call evaluate() normally."
+    )
 
 
 def _resolve_metrics(metrics: list[str] | list[MetricName] | None) -> list[MetricName]:

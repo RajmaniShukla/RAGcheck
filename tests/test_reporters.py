@@ -1,6 +1,5 @@
 """Tests for reporters (JSON, HTML)."""
 import json
-from pathlib import Path
 
 import pytest
 
@@ -13,8 +12,8 @@ from ragcheck.core.schema import (
     MetricScore,
     SampleResult,
 )
-from ragcheck.reporters.json_export import save_json, load_json, to_dict
 from ragcheck.reporters.html_report import generate_html, save_html
+from ragcheck.reporters.json_export import load_json, save_json, to_dict
 
 
 @pytest.fixture

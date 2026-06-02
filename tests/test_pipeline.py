@@ -1,6 +1,7 @@
 """Tests for the Pipeline orchestrator."""
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 from ragcheck.core.pipeline import Pipeline
 from ragcheck.core.schema import (

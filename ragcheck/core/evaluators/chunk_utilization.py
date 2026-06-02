@@ -61,11 +61,19 @@ class ChunkUtilizationEvaluator(BaseEvaluator):
             )
             result = await self.judge.judge(prompt)
 
-            # Recompute score from chunk lists for reliability
+            # Recompute score from chunk lists for reliability.
+            # Use the actual number of context chunks as the denominator, NOT
+            # len(utilized)+len(ignored). The LLM sometimes omits chunks from
+            # both lists, which would silently produce an inflated score if we
+            # used the LLM-reported totals.
             utilized = result.get("utilized_chunks", [])
             ignored = result.get("ignored_chunks", [])
-            total = len(utilized) + len(ignored)
-            computed_score = (len(utilized) / total) if total > 0 else result["score"]
+            actual_total = len(sample.contexts)
+            llm_total = len(utilized) + len(ignored)
+            # Prefer actual chunk count; fall back to LLM-reported only if
+            # we somehow have more entries than real chunks (shouldn't happen).
+            denominator = max(actual_total, llm_total)
+            computed_score = (len(utilized) / denominator) if denominator > 0 else result["score"]
 
             return MetricScore(
                 metric=self.metric,
@@ -73,6 +81,7 @@ class ChunkUtilizationEvaluator(BaseEvaluator):
                 reasoning=result.get("reasoning", ""),
                 details={
                     "total_chunks": len(sample.contexts),
+                    "utilized_count": len(utilized),
                     "utilized_chunks": utilized,
                     "ignored_chunks": ignored,
                     "utilization_details": result.get("utilization_details", []),

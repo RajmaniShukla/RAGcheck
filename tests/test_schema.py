@@ -3,15 +3,13 @@ import pytest
 from pydantic import ValidationError
 
 from ragcheck.core.schema import (
+    AggregateStats,
     EvalConfig,
-    EvalDataset,
     EvalReport,
     EvalSample,
-    JudgeConfig,
     MetricName,
     MetricScore,
     SampleResult,
-    AggregateStats,
 )
 
 

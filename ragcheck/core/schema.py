@@ -172,7 +172,7 @@ class EvalReport(BaseModel):
         lines.append(f"Samples evaluated: {len(self.results)}")
         lines.append(f"Overall score: {self.overall_score:.3f}")
         if self.passed is not None:
-            status = "✅ PASSED" if self.passed else "❌ FAILED"
+            status = "PASSED" if self.passed else "FAILED"
             lines.append(f"Threshold check: {status}")
         lines.append("")
         lines.append("Per-metric averages:")

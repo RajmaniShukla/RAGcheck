@@ -1,13 +1,12 @@
 """Tests for all 6 evaluators using mock judges."""
-import pytest
 
 from ragcheck.core.evaluators import (
+    AnswerRelevanceEvaluator,
+    ChunkUtilizationEvaluator,
+    ContextRecallEvaluator,
     ContextRelevanceEvaluator,
     FaithfulnessEvaluator,
-    AnswerRelevanceEvaluator,
-    ContextRecallEvaluator,
     NoiseSensitivityEvaluator,
-    ChunkUtilizationEvaluator,
 )
 from ragcheck.core.schema import MetricName
 

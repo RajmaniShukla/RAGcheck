@@ -12,7 +12,7 @@ from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn
 
 app = typer.Typer(
     name="ragcheck",
-    help="🔍 RAGcheck — Measure, debug, and improve your RAG pipeline quality.",
+    help="RAGcheck — Measure, debug, and improve your RAG pipeline quality.",
     add_completion=False,
     rich_markup_mode="rich",
     no_args_is_help=True,
@@ -64,9 +64,7 @@ def eval_cmd(
     fail_threshold: float | None = typer.Option(
         None,
         "--fail-threshold",
-        help="Exit code 1 if overall score < threshold (for CI use).",
-        min=0.0,
-        max=1.0,
+        help="Exit code 1 if overall score < threshold (for CI use). Must be between 0.0 and 1.0.",
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show per-sample breakdown."),
     name: str | None = typer.Option(None, "--name", "-n", help="Dataset / experiment name."),
@@ -83,6 +81,12 @@ def eval_cmd(
     from ragcheck.reporters.html_report import save_html
     from ragcheck.reporters.json_export import save_json
     from ragcheck.reporters.terminal import print_report
+
+    if fail_threshold is not None and not (0.0 <= fail_threshold <= 1.0):
+        console.print(
+            f"[red]Error:[/red] --fail-threshold must be between 0.0 and 1.0, got {fail_threshold}"
+        )
+        raise typer.Exit(1)
 
     if not input_file.exists():
         console.print(f"[red]Error:[/red] Input file not found: {input_file}")
@@ -177,6 +181,53 @@ def eval_cmd(
             f"< threshold {fail_threshold:.2f}"
         )
         raise typer.Exit(1)
+
+
+@app.command("dashboard")
+def dashboard_cmd(
+    port: int = typer.Option(8501, "--port", "-p", help="Port to run the Streamlit dashboard on."),
+    no_browser: bool = typer.Option(False, "--no-browser", help="Do not open browser automatically."),
+) -> None:
+    """
+    [bold cyan]Launch the interactive Streamlit evaluation dashboard.[/bold cyan]
+
+    [dim]Requires the dashboard extra:[/dim]
+        pip install "ragcheck[dashboard]"
+    """
+    try:
+        import streamlit  # type: ignore[import]  # noqa: F401
+    except ImportError:
+        console.print(
+            "[red]Streamlit is not installed.[/red]\n"
+            'Install the dashboard extras: [bold]pip install "ragcheck[dashboard]"[/bold]'
+        )
+        raise typer.Exit(1)
+
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    dashboard_path = Path(__file__).parent / "dashboard" / "app.py"
+    cmd = [
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
+        str(dashboard_path),
+        "--server.port",
+        str(port),
+    ]
+    if no_browser:
+        cmd += ["--server.headless", "true"]
+
+    console.print(f"[cyan]Launching RAGcheck dashboard on port {port}...[/cyan]")
+    try:
+        subprocess.run(cmd, check=True)  # noqa: S603
+    except KeyboardInterrupt:
+        console.print("\n[dim]Dashboard stopped.[/dim]")
+    except subprocess.CalledProcessError as exc:
+        console.print(f"[red]Dashboard failed:[/red] {exc}")
+        raise typer.Exit(1) from exc
 
 
 @app.command("version")

@@ -1,10 +1,9 @@
 """Tests for connectors."""
 import json
-from pathlib import Path
 
 import pytest
 
-from ragcheck.connectors.custom import from_dicts, from_json, from_csv, load
+from ragcheck.connectors.custom import from_csv, from_dicts, from_json, load
 
 
 class TestCustomConnector:
