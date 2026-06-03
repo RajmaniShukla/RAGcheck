@@ -1,5 +1,5 @@
 # 🔍 RAGcheck
-
+Rajmani Shukla
 > **An open-source toolkit to measure, debug, and improve your RAG pipeline quality.**
 
 [![PyPI version](https://badge.fury.io/py/ragcheck.svg)](https://badge.fury.io/py/ragcheck)
